@@ -1,3 +1,5 @@
+;; based on https://gist.github.com/pleasetrythisathome/30c2cec625c9fcd81163 and
+;; https://github.com/DomKM/omelette/commits/master/src/omelette/render.clj
 (ns com.firstlinq.om-ssr.render
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as log])
