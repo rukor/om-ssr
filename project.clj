@@ -6,6 +6,7 @@
             :source-paths ["src" "target/src"]
             :dependencies [[org.clojure/clojure "1.6.0"]
                            [org.clojure/clojurescript "0.0-2816" :scope "provided"]
+                           [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                            [org.omcljs/om "0.8.8" :scope "provided"]
                            [com.taoensso/timbre "3.3.1"]
                            [com.cognitect/transit-clj "0.8.259"]

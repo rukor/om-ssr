@@ -1,8 +1,5 @@
 (ns com.firstlinq.om-ssr.ring)
 
-(comment "with the following keys `route-id` (the id of the route/view),
-`params` (any params passed), and `state` (the resulting app state)")
-
 (defn create-ring-handler
   "Creates a ring handler given the following arguments:
 

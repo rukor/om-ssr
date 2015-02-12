@@ -1,15 +1,18 @@
 (ns com.firstlinq.om-ssr.state.transit
   (:require [cognitect.transit :as t])
-  #+clj (:import (java.io ByteArrayOutputStream)))
+  #+clj (:import (java.io ByteArrayOutputStream)
+                 (java.nio.charset Charset)))
 
 #+clj
 (defn serialise [data]
-  (if-not data
-    (byte-array 0)
-    (let [out (ByteArrayOutputStream.)
-          writer (t/writer out :json)]
-      (t/write writer data)
-      (.toByteArray out))))
+  (new String
+       (if-not data
+         (byte-array 0)
+         (let [out (ByteArrayOutputStream.)
+               writer (t/writer out :json)]
+           (t/write writer data)
+           (.toByteArray out)))
+       (Charset/defaultCharset)))
 
 
 #+clj
