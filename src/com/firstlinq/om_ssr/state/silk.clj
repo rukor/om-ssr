@@ -1,7 +1,8 @@
 (ns com.firstlinq.om-ssr.state.silk
   (:require [domkm.silk :as silk]
             [clojure.string :as str]
-            [com.firstlinq.om-ssr.state.simple :refer [get-state]]))
+            [taoensso.timbre :as log]
+            [com.firstlinq.om-ssr.state :refer [get-state]]))
 
 (defn request->url
   "Original request->url in silk merges in req, which I found weird."
@@ -12,7 +13,7 @@
              :path   (silk/decode-path uri)
              :query  (silk/decode-query query-string)}))
 
-(defn create-silk-request->state
+(defn create-request->state
   "Creates a request->state function based on silk routes"
   [silk-routes & {:keys [route-id-key params-key params-fn state-fn]
                   :or   {route-id-key :route-id
@@ -22,4 +23,5 @@
   (let [routes (silk/routes silk-routes)]
     (fn [request]
       (when-let [params (silk/match routes (request->url request))]
-        (state-fn (::silk/name params) (into (:params request) params))))))
+        (state-fn (::silk/name params) (into (:params request)
+                                             (dissoc params ::silk/routes)))))))

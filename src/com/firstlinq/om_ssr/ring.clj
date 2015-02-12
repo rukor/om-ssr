@@ -18,7 +18,7 @@
                     state parameters"
   [request->state render-fn state->string template]
   (fn [req]
-    (let [state (request->state req)
-          rendered (render-fn state)
-          serialised-state (state->string state)]
-      (template serialised-state rendered))))
+    (when-let [state (request->state req)]
+      (let [serialised-state (state->string state)
+            rendered (render-fn serialised-state)]
+        (template serialised-state rendered)))))
