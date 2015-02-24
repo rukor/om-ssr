@@ -24,7 +24,7 @@
     ;; set goog to import javascript using nashorn-env load(path)
     (.eval (str "
       goog.global.CLOSURE_IMPORT_SCRIPT = function(path) {
-          print(\"loading: resources/" goog-path "/\" + path);
+          // print(\"loading: resources/" goog-path "/\" + path);
           load(\"resources/" goog-path "/\" + path);
           return true;
         };"))
@@ -56,7 +56,8 @@
                  ; React requires either "window" or "global" to be defined.
                  ; Figwheel expects location.host to be defined (there is a defonce
                  ; somewhere that gets executed on load)
-                 (.eval "var global = this, window=this, location={host:{}}"))
+                 ; cookies.js requires document!
+                 (.eval "var global = this, window=this, location={host:{}}, document={}"))
 
                (true? is-dev?)
                (bootstrap-dev "public/js/out/goog")

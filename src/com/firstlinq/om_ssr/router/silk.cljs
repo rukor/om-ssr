@@ -3,11 +3,12 @@
   (:require [com.firstlinq.om-ssr.router :refer [Router] :as r]
             [com.firstlinq.om-ssr.state :refer [get-state]]
             [domkm.silk :as silk]
+            [clojure.string :as str]
             [cljs.core.async :refer [put! chan <!]]
             [goog.events :as events])
   (:import [goog.history Html5History EventType]))
 
-(defrecord SilkRouter [routes ch handler]
+(defrecord SilkRouter [routes ch]
   Router
   (navigate-to [_ path]
     (when ch (put! ch path)))
@@ -16,12 +17,27 @@
     (some? (silk/arrive routes path)))
 
   (path-for [_ key params]
-    (silk/depart routes key params)))
+    (silk/depart routes key (or params {}))))
+
+;--------------------
+; inspiration from : https://github.com/steida/este-library/blob/master/este/history/tokentransformer.coffee
+(defn- token-transformer [])
+
+(set! (.-retrieveToken (.-prototype token-transformer))
+      (fn [path-prefix location]
+        (str (.substr (.-pathname location) (.-length path-prefix))
+             (.-search location)
+             (.-hash location))))
+
+(set! (.-createUrl (.-prototype token-transformer))
+      (fn [token path-prefix location]
+        (str path-prefix token)))
+;------------------
 
 (defn- create-history-channel [routes handler]
   (when (.isSupported Html5History)
-    (let [ch (chan)
-          history (doto (Html5History.)
+    (let [ch      (chan)
+          history (doto (Html5History. nil (token-transformer.))
                     (.setUseFragment false)
                     (.setPathPrefix "")
                     (.setEnabled true))]
@@ -45,9 +61,8 @@
 (defn silk-router
   "Creates a silk based router"
   [routes & [handler]]
-  (let [routes (silk/routes routes)
-        handler (or handler get-state)
+  (let [routes     (silk/routes routes)
+        handler    (or handler get-state)
         history-ch (create-history-channel routes handler)]
-    (map->SilkRouter {:routes  routes
-                      :handler handler
-                      :ch      history-ch})))
+    (map->SilkRouter {:routes routes
+                      :ch     history-ch})))

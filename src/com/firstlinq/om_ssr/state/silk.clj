@@ -14,10 +14,18 @@
 
 (defn create-request->state
   "Creates a request->state function based on silk routes"
-  [silk-routes & {:keys [state-fn]
-                  :or   {state-fn get-state}}]
+  [silk-routes & {:keys [state-fn user-fn user-key opts]
+                  :or   {state-fn get-state
+                         user-fn  :user
+                         user-key :user}}]
   (let [routes (silk/routes silk-routes)]
     (fn [request]
       (when-let [params (silk/match routes (request->url request))]
-        (state-fn (::silk/name params) (into (:params request)
-                                             (dissoc params ::silk/routes)))))))
+        (let [user (user-fn request)
+              init {user-key user}
+              state (state-fn init                          ; initial state
+                              (::silk/name params)          ; route id
+                              (into (:params request)       ; route params
+                                    (dissoc params ::silk/routes ::silk/pattern))
+                              opts)]                        ; optional stuff
+          (merge init state))))))
