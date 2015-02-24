@@ -18,4 +18,4 @@
     (when-let [state (request->state req)]
       (let [serialised-state (state->string state)
             rendered (render-fn serialised-state)]
-        (template serialised-state rendered)))))
+        (template state serialised-state rendered)))))
