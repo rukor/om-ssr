@@ -14,10 +14,14 @@
     (when ch (put! ch path)))
 
   (path-exists? [_ path]
-    (some? (silk/arrive routes path)))
+    (some?
+      (try (silk/arrive routes path)
+           (catch js/Error _))))
 
   (path-for [_ key params]
-    (silk/depart routes key (or params {}))))
+    (try
+      (silk/depart routes key (or params {}))
+      (catch js/Error _))))
 
 ;--------------------
 ; inspiration from : https://github.com/steida/este-library/blob/master/este/history/tokentransformer.coffee

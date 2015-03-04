@@ -5,6 +5,7 @@
 #+clj
 (defmethod get-state :default [state route-id route-params opts]
   {:route {:id     route-id
+           :title  "Home"
            :params route-params}})
 
 #+cljs

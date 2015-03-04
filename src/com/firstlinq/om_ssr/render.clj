@@ -87,8 +87,9 @@
   If is-dev? is true, then return a function that bootstraps a new nashorn environment
   on each call so that we can pick up changed files, otherwise return a pre-bootstrapped
   function."
-  [render-ns render-fn-name & {:keys [is-dev?]
+  [render-ns render-fn-name & {:keys [is-dev? ]
                                :or   {is-dev? true}}]
-  (if is-dev?
+  (render-fn* render-ns render-fn-name is-dev?)
+  #_(if is-dev?
     #((render-fn* render-ns render-fn-name is-dev?) %)
     (render-fn* render-ns render-fn-name is-dev?)))
