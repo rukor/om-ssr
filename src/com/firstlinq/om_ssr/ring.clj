@@ -1,4 +1,5 @@
-(ns com.firstlinq.om-ssr.ring)
+(ns com.firstlinq.om-ssr.ring
+  (:require [com.firstlinq.om-ssr :refer [redirect-key]]))
 
 (defn create-ring-handler
   "Creates a ring handler given the following arguments:
@@ -16,6 +17,13 @@
   [request->state render-fn state->string template]
   (fn [req]
     (when-let [state (request->state req)]
-      (let [serialised-state (state->string state)
-            rendered (render-fn serialised-state)]
-        (template state serialised-state rendered)))))
+      (if-let [location (redirect-key state)]
+        ; redirect
+        {:status  302
+         :headers {"Location" location}
+         :body    "Redirecting..."}
+
+        ; else handle directly
+        (let [serialised-state (state->string state)
+              rendered (render-fn serialised-state)]
+          (template state serialised-state rendered))))))

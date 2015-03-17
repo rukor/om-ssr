@@ -28,4 +28,4 @@
                               (into (:params request)       ; route params
                                     (dissoc params ::silk/routes ::silk/pattern))
                               opts)]                        ; optional stuff
-          (merge init state))))))
+          state #_(merge init state))))))                   ; no longer merge the state, let the client do so
