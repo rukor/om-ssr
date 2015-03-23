@@ -1,6 +1,6 @@
 (ns com.firstlinq.om-ssr.router.silk
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [com.firstlinq.om-ssr.router :refer [Router] :as r]
+  (:require [com.firstlinq.om-ssr.router :refer [Router path-for] :as r]
             [com.firstlinq.om-ssr.state :refer [get-state]]
             [domkm.silk :as silk]
             [clojure.string :as str]
@@ -11,7 +11,9 @@
 (defrecord SilkRouter [routes ch]
   Router
   (navigate-to [_ path]
-    (when ch (put! ch path)))
+    (when ch
+      (when-let [path (if (vector? path) (apply path-for path) path)]
+        (put! ch path))))
 
   (path-exists? [_ path]
     (some?
