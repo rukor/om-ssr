@@ -1,14 +1,14 @@
-(ns com.firstlinq.om-ssr.router.silk
+(ns com.firstlinq.om-ssr.router.bidi
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [com.firstlinq.om-ssr.router :refer [Router path-for] :as r]
             [com.firstlinq.om-ssr.state :refer [get-state]]
-            [domkm.silk :as silk]
+            [bidi.bidi :as b]
             [clojure.string :as str]
             [cljs.core.async :refer [put! chan <!]]
             [goog.events :as events])
   (:import [goog.history Html5History EventType]))
 
-(defrecord SilkRouter [routes ch]
+(defrecord BidiRouter [routes ch]
   Router
   (navigate-to [this path]
     (when ch
@@ -17,16 +17,10 @@
 
   (path-exists? [_ path]
     (some?
-      (try (silk/arrive routes path)
-           (catch js/Error _))))
+      (b/match-route routes path)))
 
   (path-for [_ key params]
-    (try
-      (cond-> (silk/depart routes key (or params {}))
-              (not (empty? (:query params)))
-              (str "?" (silk/encode-query (get params :query {}))))
-      (catch js/Error e
-        (print "error" e)))))
+    (apply b/path-for routes (apply concat (or params {})))))
 
 ;--------------------
 ; inspiration from : https://github.com/steida/este-library/blob/master/este/history/tokentransformer.coffee
@@ -61,17 +55,17 @@
       (go
         (while true
           (let [href (<! ch)]
-            (when-let [route-map (silk/arrive routes href)]
+            (when-let [route-map (b/match-route routes href)]
               (when handler
                 (. history (setToken href nil))
-                (handler (get route-map ::silk/name) route-map))))))
+                (handler (get route-map :handler) route-map))))))
       ch)))
 
-(defn silk-router
-  "Creates a silk based router"
+(defn bidi-router
+  "Creates a bidi based router"
   [routes & [handler]]
-  (let [routes     (silk/routes routes)
+  (let [routes     (b/compile-route routes)
         handler    (or handler get-state)
         history-ch (create-history-channel routes handler)]
-    (map->SilkRouter {:routes routes
+    (map->BidiRouter {:routes routes
                       :ch     history-ch})))

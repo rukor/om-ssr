@@ -20,12 +20,13 @@
                          user-key :user}}]
   (let [routes (silk/routes silk-routes)]
     (fn [request]
-      (when-let [params (silk/match routes (request->url request))]
-        (let [user (user-fn request)
-              init {user-key user}
-              state (state-fn init                          ; initial state
-                              (::silk/name params)          ; route id
-                              (into (:params request)       ; route params
-                                    (dissoc params ::silk/routes ::silk/pattern))
-                              opts)]                        ; optional stuff
+      (when-let [match (silk/arrive routes (:uri request))]
+        (let [params (assoc match :query (:query-params request))
+              user   (user-fn request)
+              init   {user-key user}
+              state  (state-fn init                         ; initial state
+                               (::silk/name params)         ; route id
+                               (into (:params request)      ; route params
+                                     (dissoc params ::silk/routes ::silk/pattern))
+                               opts)]                       ; optional stuff
           state #_(merge init state))))))                   ; no longer merge the state, let the client do so
